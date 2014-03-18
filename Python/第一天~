@@ -1,0 +1,91 @@
+python运算符号
+“//”除法去小数点值，只留整数值，比如：
+17 / 3 = 5.666666666666667
+17 // 3 = 5
+
+“**”次方运算
+5 ** 2 = 25
+2 ** 7 = 128
+
+"_"：互动模式，最后的表达式输出的内容会赋值到"_"符号
+>>> tax = 12.5 / 100
+>>> price = 100.50
+>>> price * tax
+12.5625
+>>> price + _
+113.0625
+>>> round(_, 2)
+113.06
+
+字符类型：
+互动模式，直接输出字符串，如果字符串包含换行符“\n”会原文输出；
+>>> s = 'First line.\nSecond line.'  # \n means newline
+>>> s  # without print(), \n is included in the output
+'First line.\nSecond line.'
+>>> print(s)  # with print(), \n produces a new line
+First line.
+Second line.
+
+如果你不想让“\”字符被解释为特殊字符，你可以在print函数的参数的前添加“r”
+>>> print('C:\some\name')  # here \n means newline!
+C:\some
+ame
+>>> print(r'C:\some\name')  # note the r before the quote
+C:\some\name
+
+字符串文字可以跨多行，一个办法就是使用三引号：“”“..."""或者'''...'''
+print("""\
+Usage: thingy [OPTIONS]
+     -h                        Display this usage message
+     -H hostname               Hostname to connect to
+""")
+
+字符能使用“*”符行添加
+>>> 3 * 'un'
+'ununun'
+
+多个封闭的引号的字符会合并为一个字符
+>>> 'Py' 'thon'
+'Python'
+
+但是字符不能和变量，表达式连接，会产生错误
+>>> prefix = 'Py'
+>>> prefix 'thon'  # can't concatenate a variable and a string literal
+  ...
+SyntaxError: invalid syntax
+>>> ('un' * 3) 'ium'
+  ...
+SyntaxError: invalid syntax
+
+但是下面字符可以
+>>> 3 * 'un' 'ium'
+'uniumuniumunium'
+
+字符串可以很方便的被索引
+>>> word[0:2]  # characters from position 0 (included) to 2 (excluded)
+'Py'
+>>> word[2:5]  # characters from position 2 (included) to 5 (excluded)
+'tho'
+>>> word[:2]  # character from the beginning to position 2 (excluded)
+'Py'
+
+>>> word[:2]  # character from the beginning to position 2 (excluded)
+'Py'
+>>> word[4:]  # characters from position 4 (included) to the end
+'on'
+>>> word[-2:] # characters from the second-last (included) to the end
+'on'
+
+要记住片怎么工作的要思考字符间的子针的指数，左边边界的第一个字符标为0，右边边界的最后一个字符n字符被索引为n，比如下图
+
+ +---+---+---+---+---+---+
+ | P | y | t | h | o | n |
+ +---+---+---+---+---+---+
+ 0   1   2   3   4   5   6
+-6  -5  -4  -3  -2  -1
+
+
+
+
+
+

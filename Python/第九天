@@ -1,0 +1,59 @@
+7 输入，输出
+str()和repr()
+str()输出人类可读性较好的格式
+repr()输出解释器读写的格式
+
+python在加号链接中没有类型自动转换，比如
+>>>> s = 'sss' + 1
+会出错
+
+>>> s = 'sss' + str(1)
+>>> s
+'sss1'
+
+repr()把特殊字符转为解释器字符，比如换行符没被解释
+>>> # The repr() of a string adds string quotes and backslashes:
+... hello = 'hello, world\n'
+>>> hellos = repr(hello)
+>>> print(hellos)
+'hello, world\n'
+
+str.format()的使用
+>>> print('We are the {} who say "{}!"'.format('knights', 'Ni'))
+We are the knights who say "Ni!"
+
+>>> print('{0} and {1}'.format('spam', 'eggs'))
+spam and eggs
+>>> print('{1} and {0}'.format('spam', 'eggs'))
+eggs and spam
+
+也可以使用关键字参数
+>>> print('This {food} is {adjective}.'.format(
+...       food='spam', adjective='absolutely horrible'))
+This spam is absolutely horrible.
+
+数字下标和关键词参数可以混合使用
+>>> print('The story of {0}, {1}, and {other}.'.format('Bill', 'Manfred',
+                                                       other='Georg'))
+The story of Bill, Manfred, and Georg.
+但是非关键词参数必须在关键词参数前面
+
+可选操作“：”，提供更加方便的格式方法
+>>> import math
+>>> print('The value of PI is approximately {0:.3f}.'.format(math.pi))
+The value of PI is approximately 3.142.
+
+也可以直接用元组当format的参数，用下标访问该参数为的位置并用[]访问元组的元素
+>>> table = {'Sjoerd': 4127, 'Jack': 4098, 'Dcab': 8637678}
+>>> print('Jack: {0[Jack]:d}; Sjoerd: {0[Sjoerd]:d}; '
+...       'Dcab: {0[Dcab]:d}'.format(table))
+Jack: 4098; Sjoerd: 4127; Dcab: 8637678
+
+关键字参数可以直接用**格式化
+>>> table = {'Sjoerd': 4127, 'Jack': 4098, 'Dcab': 8637678}
+>>> print('Jack: {Jack:d}; Sjoerd: {Sjoerd:d}; Dcab: {Dcab:d}'.format(**table))
+Jack: 4098; Sjoerd: 4127; Dcab: 8637678
+
+
+
+

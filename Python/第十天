@@ -1,0 +1,25 @@
+7.2 读写文件
+open()返回一个文件对象
+
+文件会被读到内存，如果你再写到文件里面，没有关闭文件链接的情况下，读不到新加入的行
+
+f.tell()返回当前文件的读的位置
+
+f.seek(offset, from_what)改变文件对象的当前位置，from_what为0表示文件开头，1表示当前位置，2表示文件结尾
+>>> f = open('workfile', 'rb+')
+>>> f.write(b'0123456789abcdef')
+16
+>>> f.seek(5)     # Go to the 6th byte in the file
+5
+>>> f.read(1)
+b'5'
+>>> f.seek(-3, 2) # Go to the 3rd byte before the end
+13
+>>> f.read(1)
+b'd'
+
+这是很好的做法，与文件对象打交道时使用with关键字。这有该文件的套件完成后正常关闭的优势，即使引发异常的方法。它也比编写相当于try-finally块短得多：
+>>> with open('workfile', 'r') as f:
+...     read_data = f.read()
+>>> f.closed
+True

@@ -1,0 +1,3 @@
+command:Directory
+AllowOverride
+Allow：控制哪些地址可以从服务器获取东西 

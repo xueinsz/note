@@ -1,0 +1,42 @@
+9 类
+
+先了解python的作用域；
+
+作用域是静态决定的，却是动态调用。在任何执行区间，最少有三个迭代的作用域的命名空间是可以直接访问的
+.最内面的作用域，它被第一优先搜索，包含本地名字
+.任何封闭的函数作用域，它是从最近的封闭的作用域开始搜索，包含non-local,也包含 non-global names
+.下一个到最后一个范围包含当前模块的全局名字
+.最外边的作用域是内建名的作用域，最后一个搜索
+
+def scope_test():
+    def do_local():
+        spam = "local spam"
+    def do_nonlocal():
+        nonlocal spam
+        spam = "nonlocal spam"
+    def do_global():
+        global spam
+        spam = "global spam"
+    spam = "test spam"
+    do_local()
+    print("After local assignment:", spam)
+    do_nonlocal()
+    print("After nonlocal assignment:", spam)
+    do_global()
+    print("After global assignment:", spam)
+
+scope_test()
+print("In global scope:", spam)
+
+输出
+After local assignment: test spam
+After nonlocal assignment: nonlocal spam
+After global assignment: nonlocal spam
+In global scope: global spam
+
+实例化
+x = MyClass()
+def __init__()
+
+继承
+python支持多类继承

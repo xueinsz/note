@@ -1,0 +1,8 @@
+6、模块
+可执行的模块
+如果你的模块文件最后定义如下：
+if __name__ == "__main__":
+    import sys
+    fib(int(sys.argv[1])
+你可以使用命令调用 
+python fibo.py <arguments>

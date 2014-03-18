@@ -1,0 +1,72 @@
+RPC 最主要的功能就是在指定每個 NFS 功能所對應的 port number ，並且回報給用戶端，讓用戶端可以連結到正確的埠口上去。
+
+當伺服器在啟動 NFS 時會隨機取用數個埠口，並主動的向 RPC 註冊，因此 RPC 可以知道每個埠口對應的 NFS 功能
+
+所以你要注意，要啟動 NFS 之前，RPC 就要先啟動了，否則 NFS 會無法向 RPC 註冊。 另外，RPC 若重新啟動時，原本註冊的資料會不見，因此 RPC 重新啟動後，它管理的所有服務都需要重新啟動來重新向 RPC 註冊。
+
+當我以 dmtsai 這個一般身份使用者要去存取來自伺服器端的檔案時，你要先注意到的是： 檔案系統的 inode 所記錄的屬性為 UID, GID 而非帳號與群組名。
+
+如果你的 rpcinfo 無法輸出，那就表示註冊的資料有問題啦！可能需要重新啟動 rpcbind 與 nfs 喔！
+rpcinfo -p [IP|hostname]
+rpcinfo -t|-u  IP|hostname 程式名稱
+選項與參數：
+-p ：針對某 IP (未寫則預設為本機) 顯示出所有的 port 與 porgram 的資訊；
+-t ：針對某主機的某支程式檢查其 TCP 封包所在的軟體版本；
+-u ：針對某主機的某支程式檢查其 UDP 封包所在的軟體版本；
+
+# 2. 針對 nfs 這個程式檢查其相關的軟體版本資訊 (僅察看 TCP 封包)
+[root@www ~]# rpcinfo -t localhost nfs
+program 100003 version 2 ready and waiting
+program 100003 version 3 ready and waiting
+program 100003 version 4 ready and waiting
+# 可發現提供 nfs 的版本共有三種，分別是 2, 3, 4 版呦！
+
+如果有其他用戶端掛載了你的 NFS 檔案系統時，那麼該用戶端與檔案系統資訊就會被記錄到 /var/lib/nfs/xtab 裡頭去的！
+
+exportfs [-aruv]
+選項與參數：
+-a ：全部掛載(或卸載) /etc/exports 檔案內的設定
+-r ：重新掛載 /etc/exports 裡面的設定，此外，亦同步更新 /etc/exports
+     及 /var/lib/nfs/xtab 的內容！
+-u ：卸載某一目錄
+-v ：在 export 的時候，將分享的目錄顯示到螢幕上！
+
+# 1. 重新掛載一次 /etc/exports 的設定
+exportfs -arv
+exporting 192.168.100.10:/home/test
+exporting 192.168.100.0/24:/home/public
+exporting *.centos.vbird:/home/linux
+exporting *:/home/public
+exporting *:/tmp
+
+# 2. 將已經分享的 NFS 目錄資源，通通都卸載
+[root@www ~]# exportfs -auv
+# 這時如果你再使用 showmount -e localhost 就會看不到任何資源了！
+
+NFS 啟動的 RPC daemons
+rpc.nfsd：
+最主要的 NFS 伺服器服務提供者。這個 daemon 主要的功能就是在管理用戶端是否能夠使用伺服器檔案系統掛載資訊等， 其中還包含這個登入者的 ID 的判別喔！
+
+rpc.mountd
+這個 daemon 主要的功能，則是在管理 NFS 的檔案系統哩！當用戶端順利的通過 rpc.nfsd 而登入伺服器之後，在他可以使用 NFS 伺服器提供的檔案之前，還會經過檔案使用權限 (就是那個 -rwxrwxrwx 與 owner, group 那幾個權限啦) 的認證程序！他會去讀 NFS 的設定檔 /etc/exports 來比對用戶端的權限，當通過這一關之後用戶端就可以取得使用 NFS 檔案的權限啦！(註：這個也是我們用來管理 NFS 分享之目錄的使用權限與安全設定的地方哩！)
+
+rpc.lockd (非必要)
+這個玩意兒可以用在管理檔案的鎖定 (lock) 用途。為何檔案需要『鎖定』呢？ 因為既然分享的 NFS 檔案可以讓用戶端使用，那麼當多個用戶端同時嘗試寫入某個檔案時， 就可能對於該檔案造成一些問題啦！這個 rpc.lockd 則可以用來克服這個問題。 但 rpc.lockd 必須要同時在用戶端與伺服器端都開啟才行喔！此外， rpc.lockd 也常與 rpc.statd 同時啟用。
+
+rpc.statd (非必要)
+可以用來檢查檔案的一致性，與 rpc.lockd 有關！若發生因為用戶端同時使用同一檔案造成檔案可能有所損毀時， rpc.statd 可以用來檢測並嘗試回復該檔案。與 rpc.lockd 同樣的，這個功能必須要在伺服器端與用戶端都啟動才會生效。
+
+
+/etc/init.d/rpcbind start
+# 如果 rpcbind 本來就已經在執行了，那就不需要啟動啊！
+
+/etc/init.d/nfs start
+
+错误：
+1）防火墙没有配置，我是直接关闭了防火墙
+clnt_create: RPC: Port mapper failure - Unable to receive: errno 113 (No route to host)
+
+2）排查错误的方法
+cat /var/log/messages |grep rpc.nfsd
+根据nfs提供的服务来排错，从rpc.nfsd然后rpc.mountd
+
