@@ -1,0 +1,34 @@
+1）域名泛解析并使用rewrite匹配二级域名
+域名泛解析：
+<VirtualHost 127.0.0.1>
+    DocumentRoot /usr/local/apache2/htdocs/zhaofang.local
+    ServerName 91160.local
+    ServerAlias *.91160.local
+# ...
+</VirtualHost>
+所有二级域名都指到127.0.0.1，根目录为zhaofang.local
+泛解析后，使用rewrite匹配二级域名
+比如我们网站分地区使用，并有健康，疾病两个频道是和地区无关的
+地区的二级域名，比如：
+shenzheng.91160.local,
+guangzhou.91160.local
+频道的二级域名，比如：
+health.91160.local,
+disease.91160.local
+重写的规则是：
+地区的直接使用根目录的index.php文件
+频道的使用对应的目录里的index.php，比如健康频道使用health目录的index.php
+
+1，DocumentRoot的目录打开重写
+	AllowOverride All
+2，在网站根目录创建.htaccess,并添加以下内容
+RewriteEngine On
+    RewriteCond %{HTTP_HOST} (health|disease).91160.local
+    RewriteRule ^/?$ %1/index.php [L]
+
+    RewriteCond %{HTTP_HOST} ([0-9A-Za-z]+).91160.local
+    RewriteRule ^/?$ index.php?area=%1 [L]
+
+
+2）二级域名共享session方法
+用cookie记录session_id，在session_start之前设置session_id；
