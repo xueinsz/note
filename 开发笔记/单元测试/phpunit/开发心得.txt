@@ -1,0 +1,20 @@
+表单测试
+1、先验证正确的数据
+2、再验证错误的数据
+
+验证步骤
+1、根据代码的流向，一个一个函数测试
+比如下面代码
+if(checkForm()) {
+    $db->insert();
+}
+先测试checkForm函数，再测试insert();
+2、如果函数里面有对其他函数的引用，先测试引用的函数，再测试当前函数
+比如下面代码
+function insert() {
+    $result = $this->_excute();
+    
+    //do something
+}
+这样先测试_excute(),再测试insert()
+

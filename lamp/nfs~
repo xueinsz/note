@@ -1,5 +1,7 @@
 RPC 最主要的功能就是在指定每個 NFS 功能所對應的 port number ，並且回報給用戶端，讓用戶端可以連結到正確的埠口上去。
 
+簡單的使用『 rpm -qa | grep nfs 』與『 rpm -qa | grep rpcbind 』即可知道啦！如果沒有安裝的話， 在 CentOS 內可以使用『 yum install nfs-utils 』來安裝！ 
+
 當伺服器在啟動 NFS 時會隨機取用數個埠口，並主動的向 RPC 註冊，因此 RPC 可以知道每個埠口對應的 NFS 功能
 
 所以你要注意，要啟動 NFS 之前，RPC 就要先啟動了，否則 NFS 會無法向 RPC 註冊。 另外，RPC 若重新啟動時，原本註冊的資料會不見，因此 RPC 重新啟動後，它管理的所有服務都需要重新啟動來重新向 RPC 註冊。

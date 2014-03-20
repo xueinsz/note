@@ -1,0 +1,16 @@
+http://lynnteng0.blog.51cto.com/2145094/1257910
+
+http://www.it165.net/admin/html/201403/2449.html 安装初始工作
+
+php-fpm安装
+http://www.nginx.cn/231.html
+编译php
+再检查php，指定 iconv的位置  --with-iconv=/usr/local/libiconv
+
+http://ftp.gnu.org/pub/gnu/libiconv/
+
+http://wiki.nginx.org/Install
+
+http://www.nginx.cn/install
+
+如果有错误是找不到库，但是你又发现库是存在的，就要找库的-devel，比如报pcre没有，但是你用rpm -qa |grep pcre已经有了，这个时候你就要安装一下pcre-devel库

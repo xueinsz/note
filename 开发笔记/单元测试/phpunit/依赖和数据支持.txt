@@ -1,0 +1,51 @@
+phpunit依赖
+用 @depends 标注来表达依赖关系
+<?php
+class StackTest extends PHPUnit_Framework_TestCase
+{
+    public function testEmpty()
+    {
+        $stack = array();
+        $this->assertEmpty($stack);
+
+        return $stack;
+    }
+
+    /**
+     * @depends testEmpty
+	 * @dataProvider provider
+     */
+    public function testPush($element, array $stack)
+    {
+        array_push($stack, $element);
+
+        $this->assertEquals($element, $stack[count($stack)-1]);
+        $this->assertNotEmpty($stack);
+
+        return $stack;
+    }
+	
+	/**
+     * @depends testPush
+     */
+    public function testPop(array $stack)
+    {
+        array_pop($stack);
+        $this->assertEmpty($stack);
+    }
+	
+	public function provider() {
+		return [
+			['foo1'],
+			['foo2'],
+			['foo3']
+		];
+	}
+}
+?>
+
+1）在函数的头部添加 @depends testEmpty，表示依赖testEmpty函数，如果testEmpty函数没有成功，testPush函数就不会执行
+2）testEmpty函数的返回值会直接被testEmpty函数接收，比如返回的值就直接可以当做依赖的函数的参数
+3) 拥有多个 @depends 标注的测试，其第一个参数是第一个生产者提供的基境，第二个参数是第二个生产者提供的基境，以此类推。
+4) 如果测试函数testPop依赖测试函数testPush，并testPush返回值到testPop，但是testPush又使用数据供给器，
+   这样数组$stack将为null，因为数据供给器可能有多组数据，导致testPush会执行多次，return值就无法确定；phpunit的处理就是返回null
