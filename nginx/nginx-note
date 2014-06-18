@@ -1,0 +1,74 @@
+启动，停止，重载（配置文件），重启
+安装目录下，sbin目录的nginx可执行文件
+我的安装路径是/usr/local/nginx
+启动：
+/usr/local/nginx/sbin/nginx
+停止：
+/usr/local/nginx/sbin/nginx -s stop
+平滑推出：
+/usr/local/nginx/sbin/nginx -s quit
+重载：
+/usr/local/nginx/sbin/nginx -s reload
+重启：
+/usr/local/nginx/sbin/nginx -s reopen
+
+http://book.51cto.com/art/201202/314689.htm
+
+# 重写
+last,break
+last：跳出当前location，如果还有要执行的location，还会继续执行
+break：跳出当前流程，执行重写,如果还有要执行的location，也不会继续执行了
+
+#server_name
+支持的几种方式
+1 精确的名字：test.local
+2 通配符：*.test.local mail.*
+注意：通配符只能以*号开头或者结尾
+3 正则表达式：~^(www\.)?(?<domain>.+)$;
+~号开头，^$也不能忘记
+匹配顺序:
+精确的名字《通配符开头《通配符结束《正则表达式
+
+#出现forbidden的情况
+location没有设置index，而nginx取执行一个目录
+#502 Bad Gateway
+没启动php-fpm
+局域网访问没有访问权限（防火墙挡住了）
+
+反向代理
+通过指令 proxy_pass 反向代理到指定的服务器
+server {
+    location / {
+        proxy_pass http://domain; # 记得这里url要加上http，不然nginx会报错
+    }
+}
+Upstream负载
+upstream backend {
+    server backend1.test.local       weight=5;
+    server backend2.test.local;
+}
+server {
+    location / {
+        proxy_pass http://backend;
+    }
+}
+以上代码表示，当访问根目录，会被跳转到backend的服务器组，通过weight的权重做负载；
+weight表示权重；默认是1
+backup表示如果其他主力主机挂了，就启动备用的
+
+
+server {
+    location / {
+        proxy_pass http://backend;
+    }
+}
+
+location匹配命令
+http://www.nginx.cn/115.html
+
+
+实践总结
+http://zyfforlinux.blog.51cto.com/3054678/1147867
+http://zyfforlinux.blog.51cto.com/3054678/1148664
+http://zyfforlinux.blog.51cto.com/3054678/1149655
+
