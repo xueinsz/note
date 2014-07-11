@@ -14,3 +14,7 @@ http://wiki.nginx.org/Install
 http://www.nginx.cn/install
 
 如果有错误是找不到库，但是你又发现库是存在的，就要找库的-devel，比如报pcre没有，但是你用rpm -qa |grep pcre已经有了，这个时候你就要安装一下pcre-devel库
+
+错误：undefined reference to `libiconv_open，先查看一下是否安装了libiconv,如果安装了，在编译的选项里，指定 iconv的位置  --with-iconv=/usr/local/libiconv
+如果没有安装需要安装
+http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
