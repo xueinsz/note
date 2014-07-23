@@ -1,0 +1,30 @@
+php编译安装路径：/home/ms/lcoal/php/
+php配置文件：/home/ms/local/php/lib/php.ini
+php安装源路径：/home/ms/Techlonogy/PHP/php.5.5.8/
+[root@localhost openssl]# /usr/local/php/bin/phpize
+Cannot find config.m4.
+Make sure that you run '/usr/local/php/bin/phpize' in the top level source directory of the module
+
+[root@localhost openssl]# cp ./config0.m4 ./config.m4
+
+[root@localhost openssl]# /home/ms/local/php/bin/phpize
+Configuring for:
+PHP Api Version:         20090626
+Zend Module Api No:      20090626
+Zend Extension Api No:   220090626
+
+[root@localhost openssl]# ./configure --with-openssl --with-php-config=/home/ms/local/php/bin/php-config
+注：如果不想使用php自带的ext里的openssl的话 可使用参数“--with-openssl=DIR” Include OpenSSL support (requires OpenSSL >= 0.9.6)
+
+[root@localhost openssl]# make
+
+[root@localhost openssl]# make install
+
+在php.ini中加载openssl.so
+[root@localhost openssl]# vi /etc/php.ini
+加入：
+extension = "openssl.so"
+
+重启nginx
+
+查看phpinfo如果已经有对应模块，good，已经添加成功
