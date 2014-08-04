@@ -1,0 +1,8 @@
+mongo高可用
+http://www.csdn.net/article/2014-04-24/2819492-2819221-build-high-avialable-mongodb-cluster-part-2
+
+负载均衡整体解决方案
+https://www.centos.bz/2012/03/heartbeat-drbd-nfs-keepalived-lnmp/
+
+轮询-长轮询-长链接
+http://www.cnblogs.com/hoojo/p/longPolling_comet_jquery_iframe_ajax.html

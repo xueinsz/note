@@ -1,0 +1,4 @@
+http://docs.hexnova.com/amoeba/index.html Amoeba 使用指南
+http://zhou123.blog.51cto.com/4355617/983592 amoeba安装
+https://github.com/alibaba/cobar 阿里巴巴分布式数据库中间件 github更新比较活跃
+mysql proxy 需要使用lua脚本

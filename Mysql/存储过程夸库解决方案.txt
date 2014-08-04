@@ -1,0 +1,25 @@
+/********************链接数据库 *******************************/
+exec OPENDATASOURCE(
+         'SQLOLEDB',
+         'Data Source=远程ip;User ID=sa;Password=密码'
+         ).库名.dbo.存储过程名
+
+select * into 本地库名..表名 from OPENDATASOURCE(
+         'SQLOLEDB',
+         'Data Source=远程ip;User ID=sa;Password=密码'
+         ).库名.dbo.表名
+
+insert 本地库名..表名 select * from OPENDATASOURCE(
+         'SQLOLEDB',
+         'Data Source=远程ip;User ID=sa;Password=密码'
+         ).库名.dbo.表名
+
+或使用联结服务器:
+EXEC sp_addlinkedserver '别名','','MSDASQL',NULL,NULL,'DRIVER={SQL Server};SERVER=远程名;UID=用户;PWD=密码;'
+exec sp_addlinkedsrvlogin  @rmtsrvname='别名',@useself='false',@locallogin='sa',@rmtuser='sa',@rmtpassword='密码'
+GO
+然后你就可以如下：
+select * from 别名.库名.dbo.表名
+insert 库名.dbo.表名 select * from 别名.库名.dbo.表名
+select * into 库名.dbo.新表名 from 别名.库名.dbo.表名
+go

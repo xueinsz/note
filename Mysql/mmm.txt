@@ -1,0 +1,11 @@
+http://mysql-mmm.org/mmm2:guide
+
+http://blog.csdn.net/mydeman/article/details/6845567
+
+主从 
+http://369369.blog.51cto.com/319630/790921
+http://laoxu.blog.51cto.com/4120547/1198728
+
+读写分离
+http://bbs.chinaunix.net/thread-1803210-1-1.html
+mysql_proxy

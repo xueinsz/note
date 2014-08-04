@@ -1,0 +1,9 @@
+are定义变量好像要放在头部；
+set 设置变量加@符号代表什么意思；
+如果要拼凑sql可以用
+SET @sql_str = 'select * from anl_brands';
+SET @sql_str = CONCAT(@sql_str,' where brand_id=1');
+
+如果要执行sql语句，需要把sql语句用prepare关键字转为stmt，然后再用关键字execute执行。
+prepare stmt from @sql_str;
+EXECUTE stmt;

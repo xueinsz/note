@@ -1,0 +1,2 @@
+mysqld
+max_allowed_packet //运行mysql语句有多长的设置，默认1m
