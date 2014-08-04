@@ -1,0 +1,253 @@
+-- ----------------------------
+-- Procedure structure for s_partner_level_points
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `s_partner_level_points`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `s_partner_level_points`(IN `comp_id_str` text)
+BEGIN
+		DECLARE _comp_id int;
+		DECLARE _level_points int;
+		DECLARE done INT DEFAULT 0;
+
+		DECLARE cur_level_points CURSOR FOR SELECT comp_id,level_points FROM 100msh_partner.anl_partner_level WHERE find_in_set(comp_id,comp_id_str);
+		#DECLARE cur_policy_points CURSOR FOR SELECT comp_id,points FROM 100msh_partner.anl_partner_level WHERE find_in_set(comp_id,s_comp_id_by_partner_level_upgrade());
+		#定义结束标示
+		DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = 1;
+		
+		#定义临时表，用来整合partner_policy数据
+		CREATE TEMPORARY TABLE IF NOT EXISTS `tmp_policy_points`
+	  (
+				`id` int PRIMARY KEY auto_increment,
+				`comp_id` int,
+        `points` int
+    );
+
+		OPEN cur_level_points;
+		REPEAT
+				FETCH cur_level_points INTO _comp_id,_level_points;
+				IF NOT done THEN
+						INSERT INTO `tmp_policy_points`(`comp_id`,`points`) VALUES(_comp_id,_level_points);					
+				END IF;
+    UNTIL done END REPEAT;
+    
+		CLOSE cur_level_points;
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for s_partner_policy_points
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `s_partner_policy_points`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `s_partner_policy_points`(IN `comp_id_str` text)
+BEGIN
+		DECLARE done int DEFAULT 0;
+		DECLARE _comp_id int;
+		DECLARE _points int;
+		
+		#第一种情况，partner_type为商家ID，第二种情况，partner_type为商家等级ID
+		DECLARE cur_partner_policy_1 CURSOR FOR SELECT ppc.comp_id,pp.points FROM 100msh_partner.anl_partner_policy pp 
+				LEFT JOIN 100msh_partner.anl_partner_policy_comp ppc ON pp.policy_id = ppc.policy_id  
+				WHERE `time_start` < NOW() AND `time_end` > NOW() AND find_in_set(ppc.comp_id,comp_id_str) AND partner_type = 1
+			UNION 
+				SELECT pl.comp_id,pp.points FROM 100msh_partner.anl_partner_policy pp 
+					LEFT JOIN 100msh_partner.anl_partner_policy_level ppl ON pp.policy_id = ppl.policy_id
+					LEFT JOIN 100msh_partner.anl_partner_level pl ON ppl.level_id = pl.level_id
+					WHERE `time_start` < NOW() AND `time_end` > NOW() AND find_in_set(pl.comp_id,comp_id_str) AND partner_type = 2;
+		
+		#定义结束标示
+		DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = 1;
+
+		#第二种情况，partner_type为商家等级ID的政策积分
+		
+    #第二种情况，partner_type：商家等级
+    
+    #truncate TABLE `tmp_policy_points`;
+		#定义临时表，用来整合partner_policy数据
+		CREATE TEMPORARY TABLE IF NOT EXISTS `tmp_policy_points`
+	  (
+				`id` int PRIMARY KEY auto_increment,
+				`comp_id` int,
+        `points` int
+    );
+		
+		OPEN cur_partner_policy_1;
+		#OPEN cur_partner_policy_2;
+
+		REPEAT
+		FETCH cur_partner_policy_1 INTO _comp_id,_points;
+		#FETCH cur_partner_policy_2 INTO _comp_id_2,_points_2;
+				IF NOT done THEN	
+						INSERT INTO `tmp_policy_points`(`comp_id`,`points`) VALUES(_comp_id,_points);
+						#INSERT INTO `tmp_policy_points`(`comp_id`,`points`) VALUES(_comp_id_2,_points_2);
+				END IF;
+    UNTIL done END REPEAT;
+
+		CLOSE cur_partner_policy_1;
+		#CLOSE cur_partner_policy_2;
+
+
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for s_partner_reported_points
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `s_partner_reported_points`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `s_partner_reported_points`(IN `comp_id_str` text)
+BEGIN
+		DECLARE _comp_id int;
+		DECLARE done INT DEFAULT 0;
+
+		#订单问题
+		DECLARE cur_partner_reported_points CURSOR FOR SELECT comp_id FROM 100msh_partner.anl_partner_reported WHERE find_in_set(comp_id,comp_id_str);
+
+		#定义结束标示
+		DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = 1;
+		
+		#定义临时表，用来整合partner_policy数据
+		CREATE TEMPORARY TABLE IF NOT EXISTS 100msh_partner.`tmp_policy_points`
+	  (
+				`id` int PRIMARY KEY auto_increment,
+				`comp_id` int,
+        `points` int
+    );
+
+		OPEN cur_partner_reported_points;
+		REPEAT
+				FETCH cur_partner_reported_points INTO _comp_id;
+				IF NOT done THEN
+						INSERT INTO 100msh_partner.`tmp_policy_points`(`comp_id`,`points`) VALUES(_comp_id,-1);	
+				END IF;
+    UNTIL done END REPEAT;
+
+		CLOSE cur_partner_reported_points;
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Procedure structure for u_upgrade_partner_level
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `u_upgrade_partner_level`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `u_upgrade_partner_level`()
+BEGIN
+
+		#获取需要计算信用积分的商家ID
+		SET @comp_id_str = s_comp_id_by_partner_level_upgrade();
+		
+		#查找商家等级对应的积分
+		CALL s_partner_level_points(@comp_id_str);
+		#查找政策对应的积分
+		CALL s_partner_policy_points(@comp_id_str);
+
+		#查找退货对应的积分记录
+		CALL 100msh_admin.s_order_return_points(@comp_id_str);
+
+		#查找投诉积分记录
+		CALL 100msh_admin.s_complaint_points(@comp_id_str);
+
+		#查找举报对应的积分记录
+		CALL 100msh_partner.s_partner_reported_points(@comp_id_str);
+
+		#把临时表tmp_policy_points的数据数据更新到商家等级表
+		UPDATE 100msh_partner.anl_partner_level pl SET pl.credit_points = (SELECT SUM(`points`) FROM `tmp_policy_points` 
+				WHERE `tmp_policy_points`.`comp_id` = pl.`comp_id` GROUP BY `tmp_policy_points`.comp_id );
+
+		#清空表
+		TRUNCATE TABLE `tmp_policy_points`;
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Function structure for s_comp_id_by_partner_level_upgrade
+-- ----------------------------
+DROP FUNCTION IF EXISTS `s_comp_id_by_partner_level_upgrade`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` FUNCTION `s_comp_id_by_partner_level_upgrade`() RETURNS text CHARSET latin1
+BEGIN
+    #定义变量
+		DECLARE done INT DEFAULT 0;
+    DECLARE _comp_id INT;
+    #DECLARE b VARCHAR(60) CHARACTER SET utf8;
+		
+		#定义游标
+    DECLARE cur1 CURSOR FOR SELECT distinct comp_id FROM `100msh_partner`.`anl_partner_credit_operation_log`;
+    
+		#定义结束标示
+		DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = 1;
+    
+		SET @comp_id_str = '';
+    
+		OPEN cur1;
+    
+		REPEAT
+				FETCH cur1 INTO _comp_id;
+				IF NOT done THEN
+						IF @comp_id_str = '' THEN
+								SET @lian = '';
+						ELSE
+								SET @lian = ',';
+						END IF;
+						SET @comp_id_str = CONCAT(@comp_id_str,@lian,_comp_id);
+				END IF;
+    UNTIL done END REPEAT;
+    
+		CLOSE cur1;
+
+		RETURN @comp_id_str;
+END
+;;
+DELIMITER ;
+
+-- ----------------------------
+-- Function structure for s_policy_points_by_comp_id
+-- ----------------------------
+DROP FUNCTION IF EXISTS `s_policy_points_by_comp_id`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` FUNCTION `s_policy_points_by_comp_id`(`comp_id_str` text) RETURNS int(11)
+BEGIN
+		DECLARE done int DEFAULT 0;
+		#第一种情况，partner_type：商家ID
+		DECLARE _comp_id int;
+		DECLARE _points int;
+		
+		#查找
+		DECLARE cur_partner_policy CURSOR FOR SELECT pp.policy_id,pp.points FROM 100msh_partner.anl_partner_policy pp 
+			LEFT JOIN 100msh_partner.anl_partner_policy_camp ppc ON pp.policy_id = ppc.policy_id  
+			WHERE `time_start` < NOW() AND `time_end` > NOW() AND find_in_set(ppc.camp_id,s_comp_id_by_partner_level_upgrade());
+		#定义结束标示
+		DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = 1;
+		
+    #第二种情况，partner_type：商家等级
+    
+    #truncate TABLE `tmp_policy_points`;
+		#定义临时表，用来整合partner_policy数据
+		CREATE TEMPORARY TABLE IF NOT EXISTS `tmp_policy_points`
+	  (
+				`id` int PRIMARY KEY auto_increment,
+				`comp_id` int,
+        `points` int
+    );
+		
+		OPEN cur_partner_policy;
+
+		REPEAT
+		FETCH cur_partner_policy INTO _comp_id,_points;
+				IF NOT done THEN	
+						INSERT INTO `tmp_policy_points`(`comp_id`,`points`) VALUES(_comp_id,_points);
+				END IF;
+    UNTIL done END REPEAT;
+		
+		CLOSE cur_partner_policy;
+		
+	  RETURN 1;
+END
+;;
+DELIMITER ;
