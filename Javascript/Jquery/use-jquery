@@ -1,0 +1,18 @@
+eq
+通过下标查找匹配的集合的元素，返回Jquery对象
+例子
+$( "li" ).eq( 2 );
+
+focus
+把焦点定位到操作元素
+$("li").eq(2).focus();
+
+length
+Jquery对象的元素的个数，这里的length是属性，而不是方法
+$("li").length;
+$("input[name='is_support\[\]']:checked").length;// 获取name为is_support[]选中的个数
+
+css
+设置元素的css
+$("li").css('display','none');// 隐藏所有li元素
+$("#name").css('display';)
