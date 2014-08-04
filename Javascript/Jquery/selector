@@ -1,0 +1,22 @@
+比如有如下html
+<ul>
+  <li>Li One</li>
+  <li>Li Two</li>
+  <li>Li Three</li>
+  <li>Li Four</li>
+</ul>
+
+1 $("li")表示检索所有li
+而且$("li")[0],$("li")[1],$("li")[2],$("li")[3]表示四个li的html对象，记住不是jquery对象
+
+eq
+通过下标查找匹配的集合的元素，返回Jquery对象
+例子
+$("li").eq(0); // Jquery对象
+$("li").eq(0)[0]和$("li")[0]是同一个html对象
+
+
+get
+通过下标查找匹配的集合的元素，返回Html对象
+例子
+$("li").get(0)和$("li")[0]是同一个html对象
