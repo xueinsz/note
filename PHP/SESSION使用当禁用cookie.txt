@@ -1,0 +1,31 @@
+session在我的开发过程中都是使用在用户登录退出等场景，用户登录后就是在服务器记录下该用户的session，比如用户名和用户ID
+PHP的session机制是怎样的，cookie和session又有什么关系，如果禁用了cookie，session还能使用吗？带着这几个问题我实践的测试了一下，并Google找到了答案。
+
+说到session的工作机制，就会牵扯到cookie和session的关系。我们知道cookie是存储在客户端的，而session是保存在服务器的；当在php运行session_start,会生成session_id，并在php返回到浏览器时，添加cookie，这样你的浏览器就会多一个叫PHPSESSID的cookie，它的值是session_id，这样服务器和客户端在通讯时就根据客户端叫PHPSESSID的cookie找到session_id，这样服务器端就可以根据session_id找到对应的SESSION值，像用户登录场景，找到对应的session数组的值，就能判断该用户的登录状态了。
+
+禁用了cookie，session能用吗？
+其实php默认的是使用cookie来保存session_id的，但是php也提供了其他方式来使用session，比如明文传输
+如果要使用明文传输session_id，需要在php.ini里配置，
+session.use_only_cookies = 0 // 表示不单单是使用cookie保存session_id
+session.use_trans_sid = 1; // 允许SessionID通过URL明文传输
+
+代码
+test.php
+<?php
+session_start();
+$_SESSION['url'] = 'http://www.phpddt.com';
+echo '这个页面取到的session值：'.$_SESSION['url'];
+?>
+<a href="test1.php?<?php print session_name() ?>=<?php print session_id() ?>">另一个页面</a>
+
+test1.php
+<?php
+session_id($_GET['PHPSESSID']);
+session_start();
+echo "看这里是否获取到session的值：".$_SESSION['url'];
+
+先访问
+http://www.yourdomain.com/test.php // 把user_name写进session
+
+然后点击"另一个页面"链接
+
