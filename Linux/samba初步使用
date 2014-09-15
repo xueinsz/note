@@ -1,0 +1,52 @@
+SAMBA是Linux下可以和Windows系统共享文件的文件共享系统
+
+安装SAMBA
+samba:
+这个软件主要提供了SMB服务器所需的各项服务程序（smbd比nmbd）的文件、以及其他与SAMBA相关的logrotate设定和开机缺省选项档案等；
+
+samba-client:
+这个软件则提供了当Linux做为SAMBA Client端时，所需要的工具，例如挂不搭客SAMBA档案的式的mount.cifs、取得类像网芳相关树状图的smbtree等等；
+
+samba-common:
+这个软件提供的则是服务器与用户端都会使用到的资料，包括SAMBA的主要设定文件（smb.conf）、语法检验指令（testparm）等等；
+这三个软件你也要安装才行了！如果尚未安装的话，使用yum去安装它吧！
+
+/etc/samba/smb.conf：Samba的主要配置文件，我就是使用到这个配置文件而已；主要的设置分为服务器的相关设定（global），如工作组、NetBIOS名稱與密碼等級等，以及分享的目錄等相關設定，如實際目錄、分享資源名稱與權限等等兩大部分
+
+[global]
+workgroup = WORKGROUP #组名称，必须和windows的组一样
+server string = Samba Server Version %v #描述
+netbios name = Bruce     #主机名（和系统的名字没什么关系，可以自己定义），通过该名称加分享的目录名称就可以找到对应的分享目录
+
+# 與密碼有關的設定項目，包括密碼檔案所在格式喔！
+security = user          <==這行就是重點啦！改成用户验证
+passdb backend = tdbsam  <==使用的是 TDB 資料庫格式！
+
+[homes]
+comment = Home Directories #目录描述
+browseable = no            #是不是所有用户可以看到
+writable = yes             #是否有写的权限
+create mode = 0664         #创建的文件的权限
+directory mode = 0775      #创建的目录的权限
+;valid users = %S          
+;path                      #path是分享的目录在linux 的实际的路径，homes是特殊的目录，用户的家目录，所以不用使用path
+
+配置文件设定好后，添加samba的用户，该用户必须是linux系统有的用户
+pdbedit -a -u bruce
+new password: <==輸入 4321 這個密碼瞧瞧
+retype new password: <==再輸入一次吧！
+再来就看到该用户的信息了
+
+查看当前samba的所有用户
+pdbedit -L
+
+设置好samba的用户后，重新启动samba
+/etc/init.d/smb restart
+/etc/init.d/nmb restart
+
+# 2. 再使用 bruce 這個帳號登入試看看！
+[root@www ~]# smbclient -L //127.0.0.1 -U bruce
+
+使用碰到的问题
+linux防火墙没有关闭
+selinux为Enforcing，需要改为Permissive格式；查看selinux的状态getenforce，设置为Enforcing：setenforce 1，Permissive：setenforce 0
