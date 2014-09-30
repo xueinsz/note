@@ -1,0 +1,38 @@
+
+# Beginning of source-build specific instructions
+shell> tar zxvf mysql-VERSION.tar.gz
+shell> cd mysql-VERSION
+shell> cmake -DCMAKE_INSTALL_PREFIX=/home/bruce/local/mysql/ .
+shell> make
+shell> make install
+# End of source-build specific instructions
+# Postinstallation setup
+shell> cd ~/local/mysql/
+shell> mkdir etc
+shell> cp support-files/my-huge.cnf etc/my.cnf
+shell> vim etc/my.cnf
+# 然后将[mysqld]中 
+# socket = /tmp/mysql.sock 
+# 改成 
+# socket = /home/bruce/local/mysql/tmp/mysql.sock 
+# 最后再加上以下几句： 
+# log-error       = /home/bruce/local/mysql/var/mysql.err 
+# pid-file        = /home/bruce/local/mysql/var/mysqld.pid 
+# datadir         = /home/bruce/local/mysql/var/
+# 在本地环境需要测试连接是否成功，要把[client]中
+# socket = /tmp/mysql.sock 
+# 改成 
+# socket = /home/bruce/local/mysql/tmp/mysql.sock
+# 这主要是因为mysql默认情况在在/var和/etc底下没有新建目录和文件的权限，这样改了后mysql将这些都建在自己的目录下。
+# ps：mysql寻找my.cnf的顺序为/etc/my.cnf /etc/mysql/my.cnf /home/mysql/local/mysql5.1.58/etc/my.cnf ~/.my.cnf
+# bin/mysqld --verbose --help |grep -A 1 'Default options'可以看到执行寻找my.cnf的顺序
+
+shell> scripts/mysql_install_db --user=bruce
+
+# Next command is optional
+shell> cp support-files/my-medium.cnf etc/my.cnf
+shell> bin/mysqld_safe --user=bruce & #检查/etc/my.CNF是否存在
+# Next command is optional
+shell> support-files/mysql.server start
+
+参考网站：http://www.dedecms.com/knowledge/data-base/generalized/2012/0817/5063.html
