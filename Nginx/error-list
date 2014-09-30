@@ -1,0 +1,12 @@
+#出现forbidden的情况
+location没有设置index，而nginx取执行一个目录
+#502 Bad Gateway
+没启动php-fpm
+局域网访问没有访问权限（防火墙挡住了）
+
+日志错误信息
+1 connect() failed (111: Connection refused) while connecting to upstream
+  。php-fpm没有启动，nginx连接不成功
+2 FastCGI sent in stderr: "Primary script unknown" while reading response header from upstream
+  。fastcgi_param  SCRIPT_FILENAME  /scripts/$fastcgi_script_name;安装好nginx后默认的是这样，需要修改吧scripts改为$document_root
+  。php-pfm的子进程用户和nginx的子进程用户不一样
