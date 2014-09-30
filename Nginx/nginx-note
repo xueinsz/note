@@ -43,12 +43,6 @@ break：跳出当前流程，执行重写,如果还有要执行的location，也
 匹配顺序:
 精确的名字《通配符开头《通配符结束《正则表达式
 
-#出现forbidden的情况
-location没有设置index，而nginx取执行一个目录
-#502 Bad Gateway
-没启动php-fpm
-局域网访问没有访问权限（防火墙挡住了）
-
 反向代理
 通过指令 proxy_pass 反向代理到指定的服务器
 server {
