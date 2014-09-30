@@ -36,3 +36,4 @@ shell> bin/mysqld_safe --user=bruce & #检查/etc/my.CNF是否存在
 shell> support-files/mysql.server start
 
 参考网站：http://www.dedecms.com/knowledge/data-base/generalized/2012/0817/5063.html
+          http://segmentfault.com/q/1010000000328531
