@@ -1,0 +1,5 @@
+ jQuery('#divId').find("input[name*='ipt']"); //前后都模糊匹配,例如：ciptzhang diptpeng
+ jQuery('#divId').find("input[name^='ipt']"); //只匹配前半部，例如：iptzhang iptpeng
+ jQuery('#divId').find("input[name$='ipt']"); //只匹配后半部分，例如：zhangipt pengipt
+ jQuery('#divId').find("input[name='zhangipt'],input[name='pengipt']"); //多个精确匹配
+
